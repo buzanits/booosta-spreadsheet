@@ -13,6 +13,7 @@ class Spreadsheet extends \booosta\base\Module
   protected $data;
   protected $mapping;
   protected $extract_hyperlinks = false;
+  protected $autoresize = true;
 
 
   public function __construct($filename = null)
@@ -31,6 +32,7 @@ class Spreadsheet extends \booosta\base\Module
   public function get_writer_xlsx() { return new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($this->spreadsheet); }
   public function get_writer_ods() { return new \PhpOffice\PhpSpreadsheet\Writer\Ods($this->spreadsheet); }
   public function extract_hyperlinks($flag = true) { $this->extract_hyperlinks = $flag; }
+  public function set_autoresize($flag = true) { $this->autoresize = $flag; }
 
   public function save($filename = null, $format = null)
   {
@@ -49,6 +51,7 @@ class Spreadsheet extends \booosta\base\Module
   {
     if(!is_array($data)) $data = [$data];
     $this->spreadsheet->getActiveSheet()->fromArray($data);
+    if($this->autoresize) $this->autoresize();
   }
 
   public function get_indexed_data($convert2utf8 = false, $header = true)
@@ -132,5 +135,11 @@ class Spreadsheet extends \booosta\base\Module
 
     #\booosta\debug($indexname);
     return $indexname;
+  }
+
+  protected function autoresize()
+  {
+    $sheet = $this->spreadsheet->getActiveSheet();
+    foreach ($sheet->getColumnIterator() as $column) $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
   }
 }
